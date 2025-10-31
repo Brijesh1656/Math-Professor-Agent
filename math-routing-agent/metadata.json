@@ -1,0 +1,5 @@
+{
+  "name": "Math Routing Agent",
+  "description": "An Agentic-RAG system that acts as a mathematical professor, providing step-by-step solutions by checking a knowledge base or performing a web search. It incorporates a human-in-the-loop feedback mechanism to refine answers.",
+  "requestFramePermissions": []
+}
