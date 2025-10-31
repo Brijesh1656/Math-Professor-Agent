@@ -42,3 +42,59 @@ This project uses [Vite](https://vitejs.dev/) as a build tool for a fast and mod
 
 4.  **Open the App:**
     Open your web browser and navigate to the URL provided by the command in your terminal. The app will be running with hot-reloading enabled.
+
+## Deploying to Vercel
+
+This project is optimized for deployment on [Vercel](https://vercel.com/).
+
+### Prerequisites
+
+- A [Vercel account](https://vercel.com/signup) (free tier available)
+- Your project pushed to a Git repository (GitHub, GitLab, or Bitbucket)
+- A Google Gemini API key from [AI Studio](https://aistudio.google.com/app/apikey)
+
+### Deployment Steps
+
+1.  **Push your code to GitHub** (if not already done):
+    ```bash
+    git add .
+    git commit -m "Prepare for Vercel deployment"
+    git push origin main
+    ```
+
+2.  **Import Project to Vercel:**
+    - Go to [vercel.com](https://vercel.com/) and log in
+    - Click "Add New" → "Project"
+    - Import your GitHub repository
+    - Vercel will auto-detect it as a Vite project
+
+3.  **Configure Environment Variables:**
+    - In the deployment settings, add your environment variable:
+      - Key: `VITE_API_KEY`
+      - Value: Your Google Gemini API key
+    - Click "Deploy"
+
+4.  **Access Your Deployed App:**
+    - Once deployment completes, Vercel will provide a URL
+    - Your app will be live at `https://your-project-name.vercel.app`
+
+### Manual Deployment via CLI
+
+Alternatively, you can deploy using the Vercel CLI:
+
+```bash
+# Install Vercel CLI globally
+npm install -g vercel
+
+# Deploy to Vercel
+vercel
+
+# Follow the prompts and add your VITE_API_KEY when asked
+```
+
+### Automatic Deployments
+
+Once connected, Vercel will automatically deploy:
+- **Production**: Every push to your main branch
+- **Preview**: Every pull request creates a preview deployment
+

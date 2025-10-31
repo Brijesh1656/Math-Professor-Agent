@@ -1,11 +1,10 @@
 {
-    "version": 2,
-    "builds": [{
-        "src": "src/index.tsx",
-        "use": "@vercel/node"
-    }],
-    "routes": [{
-        "src": "/(.*)",
-        "dest": "/"
-    }]
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
