@@ -11,7 +11,7 @@
 
 **An AI-powered mathematics professor that provides step-by-step solutions using advanced RAG architecture and Google Gemini AI**
 
-[Live Demo](https://math-professor-agent-kishi.vercel.app) · [Report Bug](https://github.com/Brijesh1656/Math-Professor-Agent/issues) · [Request Feature](https://github.com/Brijesh1656/Math-Professor-Agent/issues)
+[Live Demo](https://math-professor-agent-k6h4.vercel.app) · [Report Bug](https://github.com/Brijesh1656/Math-Professor-Agent/issues) · [Request Feature](https://github.com/Brijesh1656/Math-Professor-Agent/issues)
 
 ![Math Professor AI Demo](https://via.placeholder.com/800x400/0a0f1e/60a5fa?text=Math+Professor+AI+Screenshot)
 
