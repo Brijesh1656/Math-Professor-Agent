@@ -7,8 +7,9 @@ import { fileURLToPath } from 'url'
 export default defineConfig({
   plugins: [react()],
   define: {
-    // This is a workaround for a pdfjs-dist issue with Vite
     'global': {},
+    // Add this line to fix the "process is not defined" error
+    'process.env': {}
   },
   resolve: {
     alias: {
