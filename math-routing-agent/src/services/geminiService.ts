@@ -16,7 +16,7 @@ export const isMathQuestion = async (ai: GoogleGenAI, question: string): Promise
       model: 'gemini-2.5-flash',
       contents: prompt,
     });
-    const resultText = response.text.trim().toLowerCase();
+    const resultText = (response.text || '').trim().toLowerCase();
     return resultText.includes('yes');
   } catch (error) {
     console.error("Guardrail check failed:", error);
@@ -47,7 +47,7 @@ ${finalPrompt}`;
     },
   });
 
-  const answer = response.text;
+  const answer = response.text || '';
   const groundingMetadata = response.candidates?.[0]?.groundingMetadata;
 
   let sources: Source[] = [];
@@ -88,7 +88,7 @@ Provide a new, refined, step-by-step solution that incorporates the feedback. If
     },
   });
 
-  return response.text;
+  return response.text || '';
 };
 
 export const extractQuestionsFromFile = async (
@@ -117,7 +117,7 @@ export const extractQuestionsFromFile = async (
   });
 
   try {
-    const jsonString = response.text.trim();
+    const jsonString = (response.text || '').trim();
     const result = JSON.parse(jsonString);
     if (result && Array.isArray(result.questions)) {
       return result.questions;
