@@ -1,0 +1,11 @@
+{
+  "buildCommand": "cd math-routing-agent && npm run build",
+  "outputDirectory": "math-routing-agent/dist",
+  "installCommand": "cd math-routing-agent && npm install",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
