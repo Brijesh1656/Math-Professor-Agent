@@ -14,7 +14,6 @@ export const isMathQuestion = async (ai: GoogleGenAI, question: string): Promise
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      // FIX: Simplified `contents` to pass prompt string directly.
       contents: prompt,
     });
     const resultText = response.text.trim().toLowerCase();
@@ -25,7 +24,6 @@ export const isMathQuestion = async (ai: GoogleGenAI, question: string): Promise
     return true;
   }
 };
-
 
 export const generateSolution = async (
   ai: GoogleGenAI,
@@ -42,7 +40,6 @@ ${finalPrompt}`;
   
   const response: GenerateContentResponse = await ai.models.generateContent({
     model: 'gemini-2.5-pro',
-    // FIX: Simplified `contents` to pass prompt string directly.
     contents: finalPrompt,
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
@@ -66,7 +63,6 @@ ${finalPrompt}`;
   return { answer, sources };
 };
 
-
 export const refineSolution = async (
   ai: GoogleGenAI,
   originalQuestion: string,
@@ -86,7 +82,6 @@ Provide a new, refined, step-by-step solution that incorporates the feedback. If
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-pro',
-    // FIX: Simplified `contents` to pass prompt string directly.
     contents: prompt,
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
@@ -100,11 +95,10 @@ export const extractQuestionsFromFile = async (
   ai: GoogleGenAI,
   fileContent: string
 ): Promise<string[]> => {
-  // FIX: Extracted prompt to a variable for clarity.
   const prompt = `From the following text, identify and extract all the mathematical questions. Present them as a JSON array of strings. If no questions are found, return an empty array. Text: """${fileContent}"""`;
+  
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash',
-    // FIX: Simplified `contents` to pass prompt string directly.
     contents: prompt,
     config: {
       responseMimeType: 'application/json',
