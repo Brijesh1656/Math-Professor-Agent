@@ -13,7 +13,6 @@ import { MathIcon } from './constants';
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://aistudiocdn.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
 
 const App: React.FC = () => {
-  // FIX: Removed useState for API key to fix `import.meta.env` error and align with guidelines. API key is now handled by process.env.API_KEY.
   const [messages, setMessages] = useState<Message[]>([]);
   const [appState, setAppState] = useState<AppState>(AppState.IDLE);
   const { searchKB } = useKnowledgeBase();
@@ -40,8 +39,8 @@ const App: React.FC = () => {
     setAppState(AppState.LOADING);
 
     try {
-      // FIX: Initialize GoogleGenAI with process.env.API_KEY as per guidelines.
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      // FIX: Use import.meta.env.VITE_API_KEY instead of process.env.API_KEY
+      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
 
       // 1. Input Guardrail Check
       const isMath = await isMathQuestion(ai, text);
@@ -91,8 +90,8 @@ const App: React.FC = () => {
     setMessages(prev => prev.map(m => m.id === messageId ? {...m, isRefined: true} : m));
 
     try {
-      // FIX: Initialize GoogleGenAI with process.env.API_KEY as per guidelines.
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      // FIX: Use import.meta.env.VITE_API_KEY instead of process.env.API_KEY
+      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
       const refinedAnswer = await refineSolution(ai, userQuestion, originalMessage.text, feedback);
       const refinedMessage: Message = {
         ...originalMessage,
@@ -153,8 +152,8 @@ const App: React.FC = () => {
       const content = await parseFileContent(file);
       if (!content.trim()) throw new Error("File is empty or could not be read.");
       
-      // FIX: Initialize GoogleGenAI with process.env.API_KEY as per guidelines.
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      // FIX: Use import.meta.env.VITE_API_KEY instead of process.env.API_KEY
+      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
       const questions = await extractQuestionsFromFile(ai, content);
       
       let agentResponseText: string;
@@ -192,7 +191,6 @@ const App: React.FC = () => {
         <p className="text-center text-sm text-gray-400">Your AI Professor for Step-by-Step Mathematical Solutions</p>
       </header>
 
-      {/* FIX: Removed API key input UI and conditional rendering to comply with guidelines. */}
       <div className="flex flex-col flex-grow w-full h-full max-w-4xl mx-auto pt-24 pb-28">
         <main ref={chatContainerRef} className="flex-grow p-4 md:p-6 overflow-y-auto space-y-8">
           {messages.length === 0 && (
