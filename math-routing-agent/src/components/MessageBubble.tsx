@@ -13,10 +13,11 @@ interface MessageBubbleProps {
 }
 
 const TypingIndicator: React.FC = () => (
-    <div className="flex items-center space-x-2 p-2">
-        <div className="w-2.5 h-2.5 bg-cyan-400 rounded-full animate-pulse" style={{animationDelay: '0s'}}></div>
-        <div className="w-2.5 h-2.5 bg-cyan-400 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
-        <div className="w-2.5 h-2.5 bg-cyan-400 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+    <div className="flex items-center space-x-2 p-3">
+        <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full typing-dot" style={{animationDelay: '0s'}}></div>
+        <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full typing-dot" style={{animationDelay: '0.2s'}}></div>
+        <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full typing-dot" style={{animationDelay: '0.4s'}}></div>
+        <span className="text-sm text-gray-400 ml-2">Thinking...</span>
     </div>
 );
 
@@ -59,51 +60,65 @@ ${message.sources.map(s => `- [${s.title}](${s.uri})`).join('\n')}
     return <div className="prose prose-sm prose-invert max-w-none prose-p:text-gray-300 prose-headings:text-white prose-strong:text-white prose-code:text-cyan-300 prose-a:text-blue-400" dangerouslySetInnerHTML={{ __html: sanitizedHtml as string }} />;
   };
 
-  const bubbleBaseClasses = "w-full p-5 rounded-2xl shadow-lg message-bubble";
+  const bubbleBaseClasses = "w-full p-6 rounded-3xl shadow-2xl transition-all duration-300";
 
   return (
-    <div className={`flex items-start gap-4 ${isUser ? 'flex-row-reverse' : ''}`}>
+    <div className={`flex items-start gap-4 ${isUser ? 'flex-row-reverse' : ''} ${isUser ? 'message-bubble-user' : 'message-bubble-agent'}`}>
        {!isUser && (
-         <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-slate-700 rounded-full border-2 border-cyan-400/50">
-           <BotIcon className="w-6 h-6 text-cyan-300" />
+         <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg glow-blue">
+           <BotIcon className="w-7 h-7 text-white" />
          </div>
        )}
-      <div className={`max-w-2xl ${isUser ? 'ml-auto' : 'mr-auto'}`}>
+       {isUser && (
+         <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl shadow-lg">
+           <span className="text-2xl">👤</span>
+         </div>
+       )}
+      <div className={`max-w-3xl ${isUser ? 'ml-auto' : 'mr-auto'}`}>
           <div className={`${bubbleBaseClasses} ${
               isUser
-                ? 'bg-blue-600/50 text-white rounded-br-none'
+                ? 'bg-gradient-to-br from-blue-600/80 to-blue-500/80 text-white glass-strong border-2 border-blue-400/30 rounded-br-md'
                 : message.isError 
-                ? 'bg-red-900/50 text-red-200 rounded-bl-none border border-red-500/50'
-                : 'bg-slate-800/80 text-gray-200 rounded-bl-none border border-white/10 relative overflow-hidden'
+                ? 'bg-gradient-to-br from-red-600/50 to-red-500/50 text-red-100 glass-strong border-2 border-red-400/50 rounded-bl-md'
+                : 'glass-strong text-gray-100 rounded-bl-md border-2 border-white/10 relative overflow-hidden hover:border-blue-400/30'
             }`}
           >
-             {!isUser && !message.isError && (
-              <div className="absolute top-0 left-0 h-full w-1 bg-gradient-to-b from-cyan-400 to-blue-500"></div>
+             {!isUser && !message.isError && !message.isLoading && (
+              <div className="absolute top-0 left-0 h-full w-1.5 bg-gradient-to-b from-blue-400 via-purple-500 to-cyan-400"></div>
              )}
-            <div className="whitespace-pre-wrap">{renderMessageContent()}</div>
+            <div className="whitespace-pre-wrap pl-2">{renderMessageContent()}</div>
             
             {message.extractedQuestions && onQuestionSelect && (
               <ExtractedQuestions questions={message.extractedQuestions} onQuestionSelect={onQuestionSelect} />
             )}
             
             {!isUser && !message.isError && !message.isLoading && message.text && (
-              <div className="mt-4 pt-4 border-t border-white/10">
+              <div className="mt-6 pt-4 border-t border-white/20 pl-2">
                  {message.knowledgeSource && (
-                    <div className="flex items-center justify-between mb-3">
-                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                    <div className="flex items-center justify-between mb-4">
+                        <span className={`text-xs font-bold px-3 py-1.5 rounded-full border-2 ${
                             message.knowledgeSource === KnowledgeSource.KNOWLEDGE_BASE
-                                ? 'bg-green-900/50 text-green-300'
-                                : 'bg-purple-900/50 text-purple-300'
+                                ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-300 border-green-400/50'
+                                : 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 border-purple-400/50'
                         }`}>
-                           Source: {message.knowledgeSource}
+                           🔍 {message.knowledgeSource}
                         </span>
-                        <button onClick={downloadAnswer} className="p-1 text-gray-400 hover:text-blue-400 transition-colors" aria-label="Download answer as Markdown">
+                        <button 
+                          onClick={downloadAnswer} 
+                          className="p-2 text-gray-400 hover:text-blue-400 transition-all duration-300 hover:scale-110 btn-hover-lift glass rounded-xl" 
+                          aria-label="Download answer as Markdown"
+                        >
                             <DownloadIcon className="w-5 h-5" />
                         </button>
                     </div>
                 )}
                  {message.isRefined && (
-                    <p className="text-xs text-green-400 mb-2 italic">This answer has been refined based on your feedback.</p>
+                    <div className="mb-3 p-3 bg-green-500/10 border-2 border-green-400/30 rounded-xl">
+                      <p className="text-xs text-green-300 font-semibold flex items-center gap-2">
+                        <span>✨</span>
+                        This answer has been refined based on your feedback
+                      </p>
+                    </div>
                 )}
                 
                 {message.sources && message.sources.length > 0 && (

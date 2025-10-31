@@ -69,7 +69,7 @@ const App: React.FC = () => {
       const errorMessage: Message = {
         ...loadingMessage,
         isLoading: false,
-        text: 'Sorry, I encountered an error. Please check your API key and try again.',
+        text: error instanceof Error ? error.message : 'Sorry, I encountered an error. Please check your API key and try again.',
         isError: true,
       };
       setMessages(prev => prev.map(m => m.id === loadingMessage.id ? errorMessage : m));
@@ -105,7 +105,7 @@ const App: React.FC = () => {
       console.error(error);
        const errorMessage: Message = {
         id: Date.now() + 1,
-        text: 'Sorry, I could not refine the answer. Please try again.',
+        text: error instanceof Error ? error.message : 'Sorry, I could not refine the answer. Please try again.',
         role: Role.AGENT,
         isError: true,
       };
@@ -169,7 +169,12 @@ const App: React.FC = () => {
       setMessages(prev => prev.map(m => m.id === loadingMessage.id ? infoMessage : m));
     } catch (error) {
       console.error(error);
-      const errorMessage: Message = { ...loadingMessage, isLoading: false, text: 'Could not extract questions from the file. The file might be empty or in an unsupported format.', isError: true };
+      const errorMessage: Message = { 
+        ...loadingMessage, 
+        isLoading: false, 
+        text: error instanceof Error ? error.message : 'Could not extract questions from the file. The file might be empty or in an unsupported format.', 
+        isError: true 
+      };
       setMessages(prev => prev.map(m => m.id === loadingMessage.id ? errorMessage : m));
     } finally {
       setAppState(AppState.IDLE);
@@ -183,43 +188,93 @@ const App: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col h-screen font-sans text-gray-200">
-      <header className="fixed top-0 left-0 right-0 z-10 p-4 border-b border-white/10 bg-black/30 backdrop-blur-md">
-        <h1 className="text-xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
-          Math Routing Agent
-        </h1>
-        <p className="text-center text-sm text-gray-400">Your AI Professor for Step-by-Step Mathematical Solutions</p>
+    <div className="flex flex-col h-screen font-sans text-gray-100 relative z-10">
+      {/* Header with Glassmorphism */}
+      <header className="fixed top-0 left-0 right-0 z-50 p-4 glass-strong shadow-2xl">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-2xl md:text-3xl font-bold text-center gradient-text mb-1">
+            🧮 Math Professor AI
+          </h1>
+          <p className="text-center text-sm text-gray-400">Your AI-Powered Mathematics Companion</p>
+        </div>
       </header>
 
-      <div className="flex flex-col flex-grow w-full h-full max-w-4xl mx-auto pt-24 pb-28">
-        <main ref={chatContainerRef} className="flex-grow p-4 md:p-6 overflow-y-auto space-y-8">
+      {/* Main Content Area */}
+      <div className="flex flex-col flex-grow w-full h-full max-w-6xl mx-auto pt-28 pb-32 px-4">
+        <main ref={chatContainerRef} className="flex-grow overflow-y-auto space-y-6 scroll-smooth">
           {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full text-center text-gray-400">
-              <div className="w-20 h-20 mb-6 text-cyan-400">
-                <MathIcon />
+            <div className="flex flex-col items-center justify-center h-full text-center">
+              {/* Hero Section */}
+              <div className="mb-8 relative">
+                <div className="absolute inset-0 blur-3xl opacity-30 bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 rounded-full"></div>
+                <div className="relative w-24 h-24 md:w-32 md:h-32 mx-auto text-blue-400 glow-blue rounded-full p-6 glass">
+                  <MathIcon />
+                </div>
               </div>
-              <h2 className="text-3xl font-bold mb-2 text-white">How can I help you today?</h2>
-              <p className="max-w-md mb-8">Ask any math question or upload a TXT/PDF file with problems.</p>
-              <div className="w-full max-w-md space-y-3">
-                  {exampleQuestions.map(q => (
+              
+              <h2 className="text-3xl md:text-5xl font-bold mb-3 text-white">
+                How can I help you today?
+              </h2>
+              <p className="max-w-2xl mb-12 text-gray-400 text-lg">
+                Ask any math question or upload a document with problems to get started
+              </p>
+              
+              {/* Example Questions Grid */}
+              <div className="w-full max-w-3xl grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {exampleQuestions.map((q, index) => (
                       <button 
                         key={q} 
                         onClick={() => handleSendMessage(q)} 
-                        className="w-full text-left p-4 bg-slate-800/50 border border-white/10 rounded-lg hover:bg-slate-700/70 hover:border-cyan-400/50 transition-all duration-300 group"
+                        className="group text-left p-6 glass rounded-2xl hover:glass-strong card-hover border-2 border-transparent hover:border-blue-500/50 transition-all duration-300"
+                        style={{ animationDelay: `${index * 100}ms` }}
                       >
-                          <span className="text-gray-300 group-hover:text-white transition-colors">{q}</span>
+                          <div className="flex items-start gap-3">
+                            <span className="text-2xl">💡</span>
+                            <span className="text-gray-300 group-hover:text-white transition-colors flex-1">
+                              {q}
+                            </span>
+                          </div>
+                          <div className="mt-3 flex items-center text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span className="text-sm">Ask this question</span>
+                            <svg className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
                       </button>
                   ))}
               </div>
+              
+              {/* Features Section */}
+              <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
+                <div className="text-center p-6 glass rounded-2xl">
+                  <div className="text-3xl mb-3">🤖</div>
+                  <h3 className="font-semibold text-white mb-2">AI-Powered</h3>
+                  <p className="text-sm text-gray-400">Advanced Gemini AI for accurate solutions</p>
+                </div>
+                <div className="text-center p-6 glass rounded-2xl">
+                  <div className="text-3xl mb-3">📚</div>
+                  <h3 className="font-semibold text-white mb-2">Step-by-Step</h3>
+                  <p className="text-sm text-gray-400">Detailed explanations for every problem</p>
+                </div>
+                <div className="text-center p-6 glass rounded-2xl">
+                  <div className="text-3xl mb-3">📄</div>
+                  <h3 className="font-semibold text-white mb-2">Document Upload</h3>
+                  <p className="text-sm text-gray-400">Extract questions from PDF & TXT files</p>
+                </div>
+              </div>
             </div>
           )}
+          
+          {/* Messages */}
           {messages.map((msg) => (
             <MessageBubble key={msg.id} message={msg} onFeedback={handleFeedback} onQuestionSelect={handleQuestionSelect} />
           ))}
         </main>
-        <footer className="fixed bottom-0 left-0 right-0 z-10">
-           <div className="max-w-4xl mx-auto p-4">
-              <div className="bg-black/30 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl">
+        
+        {/* Input Area with Enhanced Glassmorphism */}
+        <footer className="fixed bottom-0 left-0 right-0 z-50 pb-6">
+           <div className="max-w-6xl mx-auto px-4">
+              <div className="glass-strong rounded-3xl shadow-2xl glow-blue border-2 border-white/10 overflow-hidden">
                   <ChatInput onSendMessage={handleSendMessage} disabled={appState === AppState.LOADING}>
                       <FileUpload onFileSelect={handleFileSelect} disabled={appState === AppState.LOADING} />
                   </ChatInput>
