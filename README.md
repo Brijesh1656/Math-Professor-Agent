@@ -98,7 +98,7 @@
 ## 🎬 Demo & Screenshots
 
 ### Live Application
-🔗 **[Try it now!](https://math-professor-agent-kishi.vercel.app)**
+🔗 **[Try it now!](https://math-professor-agent-k6h4.vercel.app/)**
 
 ### Key Screens
 
