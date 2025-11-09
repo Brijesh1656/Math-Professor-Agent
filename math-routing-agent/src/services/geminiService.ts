@@ -88,9 +88,14 @@ export const generateSolution = async (
   let finalPrompt = `User's question: "${question}". Provide a simplified, step-by-step solution.`;
   
   if (knowledgeBaseResult) {
-    finalPrompt = `Based on the following known information, answer the user's question.
-Known Information: "${knowledgeBaseResult}"
-${finalPrompt}`;
+    finalPrompt = `Based on the following context from uploaded documents and knowledge base, answer the user's question.
+
+Context from RAG Pipeline:
+${knowledgeBaseResult}
+
+${finalPrompt}
+
+If the context doesn't fully answer the question, provide additional information based on your knowledge.`;
   }
   
   try {

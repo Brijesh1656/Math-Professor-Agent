@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "start": "vite",
-    "dev": "vite",
+    "dev": "concurrently \"npm run dev:react\" \"npm run dev:api\"",
+    "dev:react": "vite",
+    "dev:api": "bash scripts/start-api.sh",
+    "dev:api:js": "node scripts/start-api.js",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
@@ -22,6 +25,7 @@
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.2.0",
     "autoprefixer": "^10.4.19",
+    "concurrently": "^8.2.2",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.4",
     "typescript": "^5.2.2",

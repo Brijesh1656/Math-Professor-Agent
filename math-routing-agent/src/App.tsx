@@ -4,6 +4,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { Message, AppState, Role, KnowledgeSource } from './types';
 import { generateSolution, refineSolution, extractQuestionsFromFile, isMathQuestion } from './services/geminiService';
 import { useKnowledgeBase } from './hooks/useKnowledgeBase';
+import { RAGService } from './services/ragService';
 import ChatInput from './components/ChatInput';
 import MessageBubble from './components/MessageBubble';
 import FileUpload from './components/FileUpload';
@@ -50,18 +51,34 @@ const App: React.FC = () => {
         return;
       }
       
-      // 2. Knowledge Base Search (RAG)
-      const kbResult = searchKB(text);
+      // 2. RAG Pipeline: Retrieve relevant chunks from uploaded documents
+      const ragResult = await RAGService.retrieveChunks(text, 3);
+      let ragContext: string | null = null;
+      let knowledgeSource = KnowledgeSource.WEB_SEARCH;
+      
+      if (ragResult.chunks.length > 0) {
+        ragContext = ragResult.context;
+        knowledgeSource = KnowledgeSource.KNOWLEDGE_BASE;
+        console.log(`🔍 RAG: Retrieved ${ragResult.chunks.length} relevant chunks from ${ragResult.totalChunks} total chunks`);
+      } else {
+        // Fallback to keyword-based search if no RAG chunks found
+        const kbResult = searchKB(text);
+        if (kbResult) {
+          ragContext = kbResult;
+          knowledgeSource = KnowledgeSource.KNOWLEDGE_BASE;
+          console.log('📚 Using keyword-based knowledge base');
+        }
+      }
 
-      // 3. Generate Solution (from KB or Web Search)
-      const { answer, sources } = await generateSolution(ai, text, kbResult);
+      // 3. Generate Solution (using RAG context or Web Search)
+      const { answer, sources } = await generateSolution(ai, text, ragContext);
       
       const agentMessage: Message = {
         ...loadingMessage,
         isLoading: false,
         text: answer,
         sources: sources,
-        knowledgeSource: kbResult ? KnowledgeSource.KNOWLEDGE_BASE : KnowledgeSource.WEB_SEARCH,
+        knowledgeSource: knowledgeSource,
       };
       setMessages(prev => prev.map(m => m.id === loadingMessage.id ? agentMessage : m));
     } catch (error) {
@@ -152,17 +169,33 @@ const App: React.FC = () => {
       const content = await parseFileContent(file);
       if (!content.trim()) throw new Error("File is empty or could not be read.");
       
-      // FIX: Use import.meta.env.VITE_API_KEY instead of process.env.API_KEY
+      // Step 1: Process document through RAG pipeline (chunking + storage)
+      const loadingChunkMessage: Message = { 
+        ...loadingMessage, 
+        text: `Processing ${file.name} through RAG pipeline...` 
+      };
+      setMessages(prev => prev.map(m => m.id === loadingMessage.id ? loadingChunkMessage : m));
+      
+      const { chunks } = await RAGService.processDocument(content, file.name);
+      console.log(`✅ RAG Pipeline: Stored ${chunks.length} chunks from ${file.name}`);
+      
+      // Step 2: Extract questions from document
+      const loadingQuestionMessage: Message = { 
+        ...loadingMessage, 
+        text: `Extracting questions from ${file.name}...` 
+      };
+      setMessages(prev => prev.map(m => m.id === loadingMessage.id ? loadingQuestionMessage : m));
+      
       const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
       const questions = await extractQuestionsFromFile(ai, content);
       
       let agentResponseText: string;
       let questionsForMessage: string[] | undefined;
       if (questions.length > 0) {
-        agentResponseText = `I have analyzed the document and found these questions. Select one to begin.`;
+        agentResponseText = `✅ Document processed! I've stored ${chunks.length} chunks in the RAG pipeline. Found ${questions.length} question(s). Select one to begin, or ask me anything about the document.`;
         questionsForMessage = questions;
       } else {
-        agentResponseText = "I've analyzed the document, but I couldn't find any specific mathematical questions. You can ask me a question about the document's content directly.";
+        agentResponseText = `✅ Document processed! I've stored ${chunks.length} chunks in the RAG pipeline. I couldn't find specific questions, but you can ask me anything about the document's content.`;
       }
 
       const infoMessage: Message = { ...loadingMessage, isLoading: false, text: agentResponseText, extractedQuestions: questionsForMessage };
